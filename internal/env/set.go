@@ -1,59 +1,66 @@
 package env
 
 import (
-	"errors"
 	"fmt"
+	"sort"
 )
 
-// Set represents a named collection of environment variables.
+// Set holds a named collection of environment variables.
 type Set struct {
-	Name   string            `json:"name"`
-	Vars   map[string]string `json:"vars"`
+	name string
+	vars map[string]string
 }
 
-// NewSet creates a new empty Set with the given name.
+// NewSet creates an empty Set with the given name.
 func NewSet(name string) (*Set, error) {
 	if name == "" {
-		return nil, errors.New("set name cannot be empty")
+		return nil, fmt.Errorf("set: name must not be empty")
 	}
-	return &Set{
-		Name: name,
-		Vars: make(map[string]string),
-	}, nil
+	return &Set{name: name, vars: make(map[string]string)}, nil
 }
 
-// Put adds or updates a key-value pair in the set.
+// Name returns the set's name.
+func (s *Set) Name() string { return s.name }
+
+// Put stores key=value. Key must not be empty.
 func (s *Set) Put(key, value string) error {
 	if key == "" {
-		return errors.New("key cannot be empty")
+		return fmt.Errorf("set: key must not be empty")
 	}
-	s.Vars[key] = value
+	s.vars[key] = value
 	return nil
 }
 
-// Get retrieves a value by key. Returns an error if the key does not exist.
+// Get retrieves the value for key, returning an error if absent.
 func (s *Set) Get(key string) (string, error) {
-	v, ok := s.Vars[key]
+	v, ok := s.vars[key]
 	if !ok {
-		return "", fmt.Errorf("key %q not found in set %q", key, s.Name)
+		return "", fmt.Errorf("set: key %q not found", key)
 	}
 	return v, nil
 }
 
-// Delete removes a key from the set. Returns an error if the key does not exist.
-func (s *Set) Delete(key string) error {
-	if _, ok := s.Vars[key]; !ok {
-		return fmt.Errorf("key %q not found in set %q", key, s.Name)
+// Delete removes key from the set.
+func (s *Set) Delete(key string) { delete(s.vars, key) }
+
+// Keys returns all keys in sorted order.
+func (s *Set) Keys() []string {
+	keys := make([]string, 0, len(s.vars))
+	for k := range s.vars {
+		keys = append(keys, k)
 	}
-	delete(s.Vars, key)
-	return nil
+	sort.Strings(keys)
+	return keys
 }
 
-// List returns all key-value pairs as a slice of formatted strings.
-func (s *Set) List() []string {
-	out := make([]string, 0, len(s.Vars))
-	for k, v := range s.Vars {
-		out = append(out, fmt.Sprintf("%s=%s", k, v))
+// Len returns the number of variables in the set.
+func (s *Set) Len() int { return len(s.vars) }
+
+// All returns a shallow copy of the underlying map.
+func (s *Set) All() map[string]string {
+	out := make(map[string]string, len(s.vars))
+	for k, v := range s.vars {
+		out[k] = v
 	}
 	return out
 }

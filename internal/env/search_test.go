@@ -66,6 +66,14 @@ func TestSearchByValueNilSetReturnsError(t *testing.T) {
 	}
 }
 
+func TestSearchByValueEmptySubstrReturnsError(t *testing.T) {
+	s := makeSearchSet(t)
+	_, err := SearchByValue(s, "")
+	if err == nil {
+		t.Fatal("expected error for empty substr")
+	}
+}
+
 func TestSearchByValueFindsMatches(t *testing.T) {
 	s := makeSearchSet(t)
 	results, err := SearchByValue(s, "true")

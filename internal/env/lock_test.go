@@ -69,6 +69,14 @@ func TestGetLockReturnsEntry(t *testing.T) {
 	}
 }
 
+func TestGetLockMissingReturnsNotFound(t *testing.T) {
+	l := NewLockIndex()
+	_, ok := l.GetLock("nonexistent")
+	if ok {
+		t.Fatal("expected ok=false for missing lock entry")
+	}
+}
+
 func TestAllReturnsCopy(t *testing.T) {
 	l := NewLockIndex()
 	_ = l.Lock("prod", "alice")

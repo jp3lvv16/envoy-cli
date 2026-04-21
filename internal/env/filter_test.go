@@ -81,3 +81,14 @@ func TestFilterPreservesSetName(t *testing.T) {
 		t.Errorf("expected name %q, got %q", s.Name(), out.Name())
 	}
 }
+
+func TestFilterByPrefixEmptyPrefixMatchesAll(t *testing.T) {
+	s := makeFilterSet(t)
+	out, err := FilterByPrefix(s, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(out.Keys()) != len(s.Keys()) {
+		t.Fatalf("expected %d keys, got %d", len(s.Keys()), len(out.Keys()))
+	}
+}

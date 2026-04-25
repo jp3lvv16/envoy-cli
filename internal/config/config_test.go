@@ -85,3 +85,24 @@ func TestSaveCreatesFile(t *testing.T) {
 		t.Errorf("expected file to exist: %v", err)
 	}
 }
+
+func TestRemoveSet(t *testing.T) {
+	cfg := &Config{
+		Sets: []EnvSet{
+			{Name: "dev", Target: "development"},
+			{Name: "prod", Target: "production"},
+		},
+	}
+	cfg.RemoveSet("dev")
+	if len(cfg.Sets) != 1 {
+		t.Fatalf("expected 1 set after remove, got %d", len(cfg.Sets))
+	}
+	if cfg.Sets[0].Name != "prod" {
+		t.Errorf("expected remaining set to be 'prod', got %q", cfg.Sets[0].Name)
+	}
+	// Removing a non-existent set should be a no-op
+	cfg.RemoveSet("missing")
+	if len(cfg.Sets) != 1 {
+		t.Errorf("expected set count unchanged after removing missing set, got %d", len(cfg.Sets))
+	}
+}
